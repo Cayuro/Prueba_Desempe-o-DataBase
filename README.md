@@ -198,6 +198,13 @@ cd <project-directory>
 
 ```bash
 npm install
+npm i dotenv
+npm i express
+npm i mongoose
+npm i pg
+npm i fs
+npm i csv-parser
+npm i csv-parse
 ```
 
 #### 3. Configure Environment Variables
@@ -272,7 +279,7 @@ FILE_DATA_CSV="./data/your_data_file.csv"
 | `PORT` | No | `3000` | HTTP server port |
 | `POSTGRES_URI` | **Yes** | - | PostgreSQL connection string |
 | `MONGO_URI` | **Yes** | - | MongoDB connection string |
-| `FILE_DATA_CSV` | No | `./data/simulacro_unigestion_data2.csv` | Path to CSV data file |
+| `FILE_DATA_CSV` | No | `./data/prueba_unigestion_data2.csv` | Path to CSV data file |
 
 ---
 
@@ -288,191 +295,187 @@ http://localhost:3000/api
 
 | Method | Endpoint | Description | Database |
 |--------|----------|-------------|----------|
-| `POST` | `/simulacro/migrate` | Execute ETL migration | Both |
-| `GET` | `/courses` | List all courses | PostgreSQL |
-| `GET` | `/courses/:code` | Get course by code | PostgreSQL |
-| `PATCH` | `/courses/:code` | Update course | PostgreSQL |
-| `GET` | `/reports/tuition-revenue` | Financial report | PostgreSQL |
-| `GET` | `/students/:email/transcript` | Student transcript | MongoDB |
+| `POST` | `/prueba/migrate` | Execute ETL migration | Both |
+| `GET` | `/supplier` | List all courses | PostgreSQL |
+| `GET` | `/supplier/top` | get supplier top | PostgreSQL |
+| `GET` | `/top-products/:category_id` | products report | PostgreSQL |
+| `GET` | `/client/:id` | get client by id |
 
 ---
 
-### POST `/api/simulacro/migrate`
+### POST `/api/prueba/migrate`
 
 Executes the ETL migration process from CSV to databases.
 
 **Request:**
 ```http
-POST /api/simulacro/migrate
+POST /api/prueba/migrate
 Content-Type: application/json
 ```
 
 **Response (200 OK):**
 ```json
 {
-  "message": "Migration completed successfully",
-  "counters": {
-    "contStudents": 150,
-    "contProfessors": 8,
-    "contCourses": 10,
-    "contEnrollments": 1000,
-    "contDepartments": 5
-  }
+    "message": "Migración completada exitosamente",
+    "counters": {
+        "countCustomers": 9,
+        "countProducts": 15,
+        "countCategories": 3,
+        "countSuppliers": 5,
+        "countOrders": 30,
+        "countTransactions": 78
+    }
 }
 ```
 
 ---
 
-### GET `/api/courses`
+### GET `/api/supplier/top`
 
-Retrieves all courses with professor information.
+Retrieves all suppliers with sales information.
 
 **Request:**
 ```http
-GET /api/courses
+GET /api/supplier/top
 ```
 
 **Response (200 OK):**
 ```json
 {
-  "message": "Courses retrieved successfully",
-  "courses": [
-    {
-      "code": "CS101",
-      "name": "Introduction to Programming",
-      "credits": 4,
-      "profesor_name": "Dr. Ana Silva"
-    }
-  ]
+    "message": "Proveedores obtenidos exitosamente",
+    "count": 5,
+    "suppliers": [
+        {
+            "supplier_name": "Global Supplies Co",
+            "total_quantity": "41"
+        },
+        {
+            "supplier_name": "Distribuciones Andinas",
+            "total_quantity": "35"
+        },
+        {
+            "supplier_name": "AccesNet SAS",
+            "total_quantity": "33"
+        },
+        {
+            "supplier_name": "TechWorld SAS",
+            "total_quantity": "32"
+        },
+        {
+            "supplier_name": "HogarPro Ltda",
+            "total_quantity": "14"
+        }
+    ]
 }
 ```
 
 ---
 
-### GET `/api/courses/:code`
+### GET `/api/top-products/:category_id`
 
 Retrieves a specific course by its code.
 
 **Request:**
 ```http
-GET /api/courses/CS101
+GET /api/top-products/1
 ```
 
 **Response (200 OK):**
 ```json
-{
-  "message": "Course retrieved successfully",
-  "course": {
-    "code": "CS101",
-    "name": "Introduction to Programming",
-    "credits": 4,
-    "profesor_name": "Dr. Ana Silva"
-  }
-}
+[
+    {
+        "product_name": "Audifonos Sony WH",
+        "total_quantity": "9",
+        "total_revenue": "4050000"
+    },
+    {
+        "product_name": "Teclado Redragon",
+        "total_quantity": "16",
+        "total_revenue": "2880000"
+    },
+    {
+        "product_name": "Mouse Logitech M502",
+        "total_quantity": "15",
+        "total_revenue": "2250000"
+    },
+    {
+        "product_name": "Webcam Anker HD",
+        "total_quantity": "8",
+        "total_revenue": "2000000"
+    },
+    {
+        "product_name": "USB Sony 128GB",
+        "total_quantity": "11",
+        "total_revenue": "990000"
+    }
+]
 ```
 
 **Response (404 Not Found):**
 ```json
 {
-  "message": "Course not found"
+  "message": "product not found"
 }
 ```
 
 ---
 
-### PATCH `/api/courses/:code`
-
-Partially updates a course.
-
-**Request:**
-```http
-PATCH /api/courses/CS101
-Content-Type: application/json
-
-{
-  "name": "Advanced Programming",
-  "credits": 5
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "message": "Course updated successfully"
-}
-```
-
----
-
-### GET `/api/reports/tuition-revenue`
+### GET `/api/client/:id`
 
 Generates a financial report grouped by department.
 
 **Request:**
 ```http
-GET /api/reports/tuition-revenue
+GET /api/client/8
 ```
 
 **Response (200 OK):**
 ```json
 {
-  "message": "Report retrieved successfully",
-  "report": [
-    {
-      "facultad": "Engineering",
-      "totalrecaudo": "4800000"
-    },
-    {
-      "facultad": "Humanities",
-      "totalrecaudo": "2400000"
-    }
-  ]
-}
-```
-
----
-
-### GET `/api/students/:email/transcript`
-
-Retrieves the complete academic transcript from MongoDB.
-
-**Request:**
-```http
-GET /api/students/j.perez@example.edu/transcript
-```
-
-**Response (200 OK):**
-```json
-{
-  "message": "Transcript retrieved successfully",
-  "responseTimeMs": 15,
-  "transcript": {
-    "studentEmail": "j.perez@example.edu",
-    "studentName": "Juan Perez",
-    "academicHistory": [
-      {
-        "courseCode": "CS101",
-        "courseName": "Introduction to Programming",
-        "credits": 4,
-        "semester": "2023-1",
-        "professorName": "Dr. Ana Silva",
-        "grade": 4.5,
-        "status": "Approved"
-      }
-    ],
-    "summary": {
-      "totalCreditsEarned": 24,
-      "averageGrade": 4.2
-    }
-  }
-}
-```
-
-**Response (404 Not Found):**
-```json
-{
-  "message": "Student not found",
-  "searchedEmail": "nonexistent@example.edu"
+    "message": "Clientes obtenidos exitosamente",
+    "count": 5,
+    "clients": [
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 150000,
+            "product_name": "Mouse Logitech M502",
+            "quantity": 1
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 750000,
+            "product_name": "Escritorio MDF",
+            "quantity": 1
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 1800000,
+            "product_name": "Impresora HP 110",
+            "quantity": 3
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 360000,
+            "product_name": "Teclado Redragon",
+            "quantity": 2
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2021",
+            "date": "2024-02-01T05:00:00.000Z",
+            "total_value": 2550000,
+            "product_name": "Monitor LG 27 pulgadas",
+            "quantity": 3
+        }
+    ]
 }
 ```
 
@@ -483,68 +486,119 @@ GET /api/students/j.perez@example.edu/transcript
 ### PostgreSQL Schema
 
 ```sql
--- Students table
-CREATE TABLE student (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(50) NOT NULL UNIQUE,
-    phone VARCHAR(15) NOT NULL
+CREATE TABLE IF NOT EXISTS "transaction" (
+	"id" INTEGER NOT NULL UNIQUE GENERATED BY DEFAULT AS IDENTITY,
+	"quantity" INTEGER NOT NULL,
+	"total_value" INTEGER NOT NULL,
+	"product_id" VARCHAR(30) NOT NULL,
+	"supplier_id" INTEGER NOT NULL,
+	"order_id" VARCHAR(30) NOT NULL,
+	"customer_id" INTEGER NOT NULL,
+	PRIMARY KEY("id")
 );
 
--- Departments table
-CREATE TABLE department (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
+
+
+
+CREATE TABLE IF NOT EXISTS "customer" (
+	"id" INTEGER NOT NULL UNIQUE GENERATED BY DEFAULT AS IDENTITY,
+	"name" VARCHAR(50) NOT NULL,
+	"email" VARCHAR(50) NOT NULL UNIQUE,
+	"address" VARCHAR(50) NOT NULL,
+	"phone" VARCHAR(50) NOT NULL,
+	"city_id" INTEGER NOT NULL,
+	PRIMARY KEY("id")
 );
 
--- Professors table
-CREATE TABLE profesor (
-    id SMALLSERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(50) NOT NULL UNIQUE,
-    department_id INTEGER REFERENCES department(id)
+
+
+
+CREATE TABLE IF NOT EXISTS "product" (
+	"id" VARCHAR(30) NOT NULL UNIQUE,
+	"name" VARCHAR(100) NOT NULL,
+	"price" INTEGER NOT NULL,
+	"category_id" INTEGER NOT NULL,
+	PRIMARY KEY("id")
 );
 
--- Courses table
-CREATE TABLE course (
-    code VARCHAR(20) PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    credits SMALLINT NOT NULL,
-    profesor_id INTEGER REFERENCES profesor(id)
+
+
+
+CREATE TABLE IF NOT EXISTS "category" (
+	"id" INTEGER NOT NULL UNIQUE GENERATED BY DEFAULT AS IDENTITY,
+	"name" VARCHAR(50) NOT NULL UNIQUE,
+	PRIMARY KEY("id")
 );
 
--- Enrollments table
-CREATE TABLE enrollments (
-    enrollment_id VARCHAR(20) PRIMARY KEY,
-    semester VARCHAR(15) NOT NULL,
-    grade DECIMAL(2,1) NOT NULL,
-    tuition_fee INTEGER NOT NULL,
-    student_id INTEGER REFERENCES student(id),
-    course_code VARCHAR(20) REFERENCES course(code)
+
+
+
+CREATE TABLE IF NOT EXISTS "supplier" (
+	"id" INTEGER NOT NULL UNIQUE GENERATED BY DEFAULT AS IDENTITY,
+	"name" VARCHAR(50) NOT NULL,
+	"email" VARCHAR(50) NOT NULL UNIQUE,
+	PRIMARY KEY("id")
 );
+
+
+
+
+CREATE TABLE IF NOT EXISTS "city" (
+	"id" INTEGER NOT NULL UNIQUE GENERATED BY DEFAULT AS IDENTITY,
+	"name" VARCHAR(50) NOT NULL UNIQUE,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "order" (
+	"id" VARCHAR(30) NOT NULL UNIQUE,
+	"date" DATE,
+	PRIMARY KEY("id")
+);
+
+
+ALTER TABLE "product"
+ADD FOREIGN KEY("category_id") REFERENCES "category"("id")
+ON UPDATE cascade ON DELETE cascade;
+ALTER TABLE "transaction"
+ADD FOREIGN KEY("customer_id") REFERENCES "customer"("id")
+ON UPDATE cascade ON DELETE cascade;
+ALTER TABLE "transaction"
+ADD FOREIGN KEY("product_id") REFERENCES "product"("id")
+ON UPDATE cascade ON DELETE cascade;
+ALTER TABLE "customer"
+ADD FOREIGN KEY("city_id") REFERENCES "city"("id")
+ON UPDATE cascade ON DELETE cascade;
+ALTER TABLE "transaction"
+ADD FOREIGN KEY("supplier_id") REFERENCES "supplier"("id")
+ON UPDATE cascade ON DELETE cascade;
+ALTER TABLE "transaction"
+ADD FOREIGN KEY("order_id") REFERENCES "order"("id")
+ON UPDATE cascade ON DELETE cascade;
+ALTER TABLE "transaction" 
+ADD CONSTRAINT "unique_product_order" UNIQUE ("product_id", "order_id");
 ```
 
 ### MongoDB Schema
 
 ```javascript
-// Academic Transcripts Collection
-{
-  studentEmail: String,      // Unique identifier
-  studentName: String,
-  academicHistory: [{
-    courseCode: String,
-    courseName: String,
-    credits: Number,
-    semester: String,
-    professorName: String,
-    grade: Number,
-    status: String           // "Approved", "Failed", "In Progress"
-  }],
-  summary: {
-    totalCreditsEarned: Number,
-    averageGrade: Number
-  }
-}
+// customerSchema
+    {
+        "customerEmail": String,
+        "customerName": String,
+        "orderHistory": [
+          "orderId": String,
+        "date": Date,
+        "products": ["productSku": String,
+        "productName": String,
+        "quantity": Number,
+        "unitPrice": Number,
+        "totalValue": Number]
+        ]
+    }
+  
 ```
 
 ---
@@ -572,19 +626,11 @@ The migration is idempotent - running it multiple times produces the same result
 
 ```sql
 -- PostgreSQL uses ON CONFLICT
-INSERT INTO student (name, email, phone)
-VALUES ($1, $2, $3)
-ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name
-RETURNING xmax;  -- xmax = 0 means INSERT, > 0 means UPDATE
-```
-
-```javascript
-// MongoDB uses upsert
-await Collection.findOneAndUpdate(
-  { studentEmail: email },
-  { $set: {...}, $push: {...} },
-  { upsert: true }
-);
+INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
+                VALUES ($1, $2, $3, $4, $5, $6) 
+                ON CONFLICT ("product_id", "order_id")
+                DO UPDATE SET quantity = EXCLUDED.quantity, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, supplier_id = EXCLUDED.supplier_id, customer_id = EXCLUDED.customer_id
+                RETURNING xmax;  -- xmax = 0 means INSERT, > 0 means UPDATE
 ```
 
 ---
@@ -702,7 +748,7 @@ app.use('/api/my-endpoint', myRouter);
 1. Import the collection or create requests manually
 2. Set environment variable: `{{base_url}}` = `http://localhost:3000`
 3. Test sequence:
-   - POST `/api/simulacro/migrate` (run first)
+   - POST `/api/prueba/migrate` (run first)
    - GET `/api/courses`
    - GET `/api/students/:email/transcript`
 
@@ -710,7 +756,7 @@ app.use('/api/my-endpoint', myRouter);
 
 ```bash
 # Migrate data
-curl -X POST http://localhost:3000/api/simulacro/migrate
+curl -X POST http://localhost:3000/api/prueba/migrate
 
 # Get all courses
 curl http://localhost:3000/api/courses

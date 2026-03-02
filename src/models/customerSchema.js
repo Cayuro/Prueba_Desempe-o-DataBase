@@ -35,3 +35,8 @@ export const customerSchema = mongoose.model(
     "UserOrders",  // Nombre de la colección en MongoDB (se pluraliza automáticamente)
     CustomerSchema  // Esquema que define la estructura de los documentos
 );
+
+export const orderHistorySchemaModel = mongoose.model(
+    "OrderHistory",  // Nombre de la colección en MongoDB (se pluraliza automáticamente)
+    orderHistorySchema  // Esquema que define la estructura de los documentos
+);

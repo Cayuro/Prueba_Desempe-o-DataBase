@@ -2,7 +2,7 @@ import { pool } from "../config/postgres.js";
 import fs from 'fs';
 import csv from 'csv-parser';
 import { env } from "../config/env.js";
-import { customerSchema } from "../models/customerSchema.js";
+import { customerSchema, orderHistorySchemaModel } from "../models/customerSchema.js";
 import { logSchemaModel } from "../models/logsSchema.js";
 // import { set } from "mongoose";
 
@@ -312,6 +312,31 @@ export async function queryData() {
     //     }},
     //     {upsert: true}
     // );
+
+    await orderHistorySchemaModel.findOneAndUpdate(
+    { "customerEmail": customerEmail },  // Filtro de búsqueda
+    {
+        // Solo aplica si es documento nuevo
+        $setOnInsert: {
+            "orderId": orderId,
+            "date": transactionDate,
+                      },
+        // Siempre agrega el pedido al historial
+        $push: {                
+                "products": [
+                    {
+                        "productSku": productSku,
+                        "productName": productName,
+                        "quantity": quantity,
+                        "unitPrice": unitPrice,
+                        "totalValue": totalLineValue,
+                    }
+                ]
+            }
+        }
+    ,
+    { upsert: true }
+);
             
             await customerSchema.findOneAndUpdate(
                 { "customerEmail": customerEmail },  // Filtro de búsqueda
