@@ -6,8 +6,8 @@ const productsSchema = mongoose.Schema(
         "productSku": String,
         "productName": String,
         "quantity": Number,
-        "unitPrice": Number
-        
+        "unitPrice": Number,
+        "totalValue": Number
     }, 
     { _id: false }  // No generar _id para los cursos individuales
 );
@@ -16,7 +16,6 @@ const orderHistorySchema = mongoose.Schema(
     {
         "orderId": String,
         "date": Date,
-        "totalValue": Number,
         "products": [productsSchema]  // Array de productos usando el sub-esquema
     }, 
     { _id: false }

@@ -2,7 +2,7 @@ import { pool } from "../config/postgres.js";
 import fs from 'fs';
 import csv from 'csv-parser';
 import { env } from "../config/env.js";
-import { customerSchema } from "../models/transcripts.js";
+import { customerSchema } from "../models/customerSchema.js";
 
 export async function queryTables() {
     const client = await pool.connect();
@@ -107,8 +107,10 @@ ON UPDATE cascade ON DELETE cascade;
 ALTER TABLE "transaction"
 ADD FOREIGN KEY("order_id") REFERENCES "order"("id")
 ON UPDATE cascade ON DELETE cascade;
-AlTER TABLE "transaction"
-ADD CONSTRAINT "unique_product_order" UNIQUE ("product_id", "order_id");`);
+
+ALTER TABLE "transaction"
+ADD CONSTRAINT "unique_product_order" UNIQUE ("product_id", "order_id");
+`);
 
         // Si todo salió bien, confirmamos los cambios
         await client.query('COMMIT');
@@ -182,7 +184,6 @@ export async function queryData() {
             // Datos del producto
             const productSku = row.product_sku.trim().toUpperCase();
             const productName = row.product_name.trim();
-            console.log(productName);
             const unitPrice = parseInt(row.unit_price);  // String → número entero
 
             // datos pedido 
@@ -250,7 +251,6 @@ export async function queryData() {
                 DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, category_id = EXCLUDED.category_id
                 RETURNING xmax
             `, [productSku, productName, unitPrice, categoryId.rows[0].id]);
-            console.log(categoryId.rows[0].id);
             
             // obtenemos el ID del supplier 
             const supplierID = await client.query(
@@ -275,20 +275,13 @@ export async function queryData() {
             // transaction insertamos la transacción con el cliente y producto relacionados
             // evitar duplicados: si el mismo pedido ya existe, actualizamos cantidad y valor total
             
-
+            
             const transaction_result = await client.query(`
-                INSERT INTO "transaction" (
-    "quantity", "total_value", "product_id", 
-    "supplier_id", "order_id", "customer_id"
-) 
-VALUES ($1, $2, $3, $4, $5, $6) 
-ON CONFLICT ("product_id", "order_id")
-DO UPDATE SET 
-    quantity = EXCLUDED.quantity, 
-    total_value = EXCLUDED.total_value, 
-    supplier_id = EXCLUDED.supplier_id, 
-    customer_id = EXCLUDED.customer_id
-RETURNING xmax
+                INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
+                VALUES ($1, $2, $3, $4, $5, $6) 
+                ON CONFLICT ("product_id", "order_id")
+                DO UPDATE SET quantity = EXCLUDED.quantity, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, supplier_id = EXCLUDED.supplier_id, customer_id = EXCLUDED.customer_id
+                RETURNING xmax
             `, [quantity, totalLineValue, productSku, supplierID.rows[0].id, orderId, customerID.rows[0].id]);
 
            
@@ -307,13 +300,13 @@ RETURNING xmax
                         "orderHistory": {
                             "orderId": orderId,
                             "date": transactionDate,
-                            "totalValue": totalLineValue,
                             "products": [
                                 {
                                     "productSku": productSku,
                                     "productName": productName,
                                     "quantity": quantity,
-                                    "unitPrice": unitPrice
+                                    "unitPrice": unitPrice,
+                                    "totalValue": totalLineValue,
                                 }
                             ]
                         }
