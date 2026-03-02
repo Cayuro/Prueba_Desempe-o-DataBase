@@ -1,19 +1,33 @@
 import mongoose from "mongoose";
 
-
-const logSchema = mongoose.Schema(
-    {
-        "table": String,
-        "date": Date,
-        "query": String
-    }, 
-    { _id: false }  // No generar _id para los cursos individuales
+const logsSchema = new mongoose.Schema(
+  {
+    table: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    operation: {
+      type: String,
+      enum: ["INSERT", "UPDATE", "DELETE"],
+      required: true,
+    },
+    date: {
+      type: Date,
+      default: Date.now,
+      required: true,
+    },
+    query: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  {
+    versionKey: false,
+    collection: "transaction_logs",
+  }
 );
 
-
-export const logSchemaModel = mongoose.model(
-    "Logs",  // Nombre de la colección en MongoDB (se pluraliza automáticamente)
-    logSchema  // Esquema que define la estructura de los documentos
-);
-
-// no funciona el modelo de logsSchema
+export const logsSchemaModel = mongoose.model("TransactionLog", logsSchema);
