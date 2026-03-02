@@ -844,3 +844,8 @@ This project is licensed under the **ISC License**.
 <p align="center">
   Made with ❤️ using Node.js, PostgreSQL, and MongoDB
 </p>
+
+## NORMALIZATION TABLES
+first the I change the xlsx for a csv, then I separeted manually the city and the address for more normalization, and then I create tables without transitive references or dependencie of secondary id, 1FN only the city that was in the address, 2FN separate the product that has product_sku and order like transaction_id, because each transaction id has an order, and the transaction id is repeated in the csv. 
+then the 3FN I separeted category, supplier, and customer, and at the end I have 7 entities like 
+orders, transaction, product, category, supplier, customer, city
