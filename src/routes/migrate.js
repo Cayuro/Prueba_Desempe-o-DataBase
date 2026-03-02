@@ -2,60 +2,23 @@
  * ============================================================================
  * ARCHIVO: migrate.js - RUTAS DE MIGRACIÓN DE DATOS
  * ============================================================================
- * 
- * Este archivo define el endpoint para migrar datos del CSV a las bases de datos.
- * 
- * ¿QUÉ ES UNA RUTA (ROUTE)?
- * Es la definición de qué hacer cuando alguien hace una petición HTTP
- * a una URL específica. Define:
- * - El MÉTODO HTTP (GET, POST, PUT, DELETE, PATCH)
- * - La URL (/migrate)
- * - Qué función ejecutar cuando llegue esa petición
- * 
- * ENDPOINT DISPONIBLE:
- * POST /api/simulacro/migrate - Ejecuta la migración de datos
+ 
+* ENDPOINT DISPONIBLE:
+ * POST /api/prueba/migrate - Ejecuta la migración de datos
  */
 
 // ============================================================================
 // IMPORTACIONES
 // ============================================================================
 
-// Router de Express - nos permite definir rutas modulares
 import { Router } from "express";
-
-// Función que ejecuta la migración (lee CSV, inserta en PostgreSQL y MongoDB)
 import { migrateData } from "../config/postgres.js";
 
-/**
- * Router() crea un mini-aplicación de Express donde podemos definir rutas.
- * Luego este router se "monta" en app.js con app.use('/api/simulacro', router)
- */
 const router = Router();
-
-// ============================================================================
-// DEFINICIÓN DE RUTAS
-// ============================================================================
-
-/**
- * POST /migrate - Ejecuta la migración de datos
- * 
- * ¿POR QUÉ POST?
- * Usamos POST porque esta operación CREA datos en las bases de datos.
- * Los métodos HTTP tienen significados:
- * - GET = obtener/leer datos (sin modificar nada)
- * - POST = crear nuevos datos
- * - PUT = reemplazar datos existentes completamente
- * - PATCH = modificar parcialmente datos existentes
- * - DELETE = eliminar datos
- * 
- * PARÁMETROS:
- * - req (request) = la petición que llega del cliente (Postman, frontend, etc.)
- * - res (response) = el objeto para enviar respuesta al cliente
- * 
+/*
  * EJEMPLO DE USO CON POSTMAN:
  * Método: POST
- * URL: http://localhost:3000/api/simulacro/migrate
- * Body: (vacío, no se necesita enviar datos)
+ * URL: http://localhost:3000/api/prueba/migrate
  */
 router.post('/migrate', async (req, res) => {
     try {

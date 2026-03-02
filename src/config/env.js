@@ -13,8 +13,8 @@ const required = ["MONGO_URI", "POSTGRES_URI"];
 
 for (const key of required) {
     if (!process.env[key]) {
-        console.log(`❌ Error: Falta la variable de entorno requerida: ${key}`);
-        console.log(`   Asegúrate de crear un archivo .env en la raíz del proyecto`);
+        console.log(`Error: Falta la variable de entorno requerida: ${key}`);
+        console.log(`Asegúrate de crear un archivo .env en la raíz del proyecto`);
         // Podrías descomentar esto para detener la app si falta una variable:
         // throw new Error(`Missing required environment variable: ${key}`);
     }

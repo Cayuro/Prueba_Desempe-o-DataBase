@@ -2,7 +2,7 @@ import { pool } from "../config/postgres.js";
 import fs from 'fs';
 import csv from 'csv-parser';
 import { env } from "../config/env.js";
-import { AcademicTranscripts } from "../models/transcripts.js";
+import { customerSchema } from "../models/transcripts.js";
 
 export async function queryTables() {
     const client = await pool.connect();
@@ -106,7 +106,9 @@ ADD FOREIGN KEY("supplier_id") REFERENCES "supplier"("id")
 ON UPDATE cascade ON DELETE cascade;
 ALTER TABLE "transaction"
 ADD FOREIGN KEY("order_id") REFERENCES "order"("id")
-ON UPDATE cascade ON DELETE cascade;`);
+ON UPDATE cascade ON DELETE cascade;
+AlTER TABLE "transaction"
+ADD CONSTRAINT "unique_product_order" UNIQUE ("product_id", "order_id");`);
 
         // Si todo salió bien, confirmamos los cambios
         await client.query('COMMIT');
@@ -271,44 +273,55 @@ export async function queryData() {
                 `, [customerEmail]
             )
             // transaction insertamos la transacción con el cliente y producto relacionados
+            // evitar duplicados: si el mismo pedido ya existe, actualizamos cantidad y valor total
+            
+
             const transaction_result = await client.query(`
-                INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
-                VALUES ($1, $2, $3, $4, $5, $6) 
-                ON CONFLICT ("id")
-                DO UPDATE SET quantity = EXCLUDED.quantity, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, supplier_id = EXCLUDED.supplier_id, customer_id = EXCLUDED.customer_id
-                RETURNING xmax
+                INSERT INTO "transaction" (
+    "quantity", "total_value", "product_id", 
+    "supplier_id", "order_id", "customer_id"
+) 
+VALUES ($1, $2, $3, $4, $5, $6) 
+ON CONFLICT ("product_id", "order_id")
+DO UPDATE SET 
+    quantity = EXCLUDED.quantity, 
+    total_value = EXCLUDED.total_value, 
+    supplier_id = EXCLUDED.supplier_id, 
+    customer_id = EXCLUDED.customer_id
+RETURNING xmax
             `, [quantity, totalLineValue, productSku, supplierID.rows[0].id, orderId, customerID.rows[0].id]);
 
            
 
             // mongoDB: actualizamos el historial académico del estudiante
-            // await AcademicTranscripts.findOneAndUpdate(
-            //     { "studentEmail": studentEmail },  // Filtro de búsqueda
-            //     {
-            //         // Solo aplica si es documento nuevo
-            //         $setOnInsert: {
-            //             "studentEmail": studentEmail,
-            //             "studentName": studentName,
-            //             "summary": {
-            //                 "totalCreditsEarned": 4,    // Valor inicial (se actualiza después)
-            //                 "averageGrade": 4.5         // Valor inicial (se actualiza después)
-            //             },
-            //         },
-            //         // Siempre agrega el curso al historial
-            //         $push: {
-            //             "academicHistory": {
-            //                 "courseCode": courseCode,
-            //                 "courseName": courseName,
-            //                 "credits": credits,
-            //                 "semester": semester,
-            //                 "professorName": professorName,
-            //                 "grade": grade,
-            //                 "status": "Aprobado"
-            //             }
-            //         }
-            //     },
-            //     { upsert: true }  // Si no existe, créalo
-            // );
+            await customerSchema.findOneAndUpdate(
+                { "customerEmail": customerEmail },  // Filtro de búsqueda
+                {
+                    // Solo aplica si es documento nuevo
+                    $setOnInsert: {
+                        "customerEmail": customerEmail,
+                        "customerName": customerName,
+                                  },
+                    // Siempre agrega el pedido al historial
+                    $push: {
+                        "orderHistory": {
+                            "orderId": orderId,
+                            "date": transactionDate,
+                            "totalValue": totalLineValue,
+                            "products": [
+                                {
+                                    "productSku": productSku,
+                                    "productName": productName,
+                                    "quantity": quantity,
+                                    "unitPrice": unitPrice
+                                }
+                            ]
+                        }
+                    }
+                },
+                { upsert: true } 
+           
+            );
             
             // ------------------------------------------------------------
             // 2.8: ACTUALIZAR CONTADORES
@@ -322,39 +335,6 @@ export async function queryData() {
             if (transaction_result.rows[0].xmax === '0') counters.countTransactions++;
             }
         
-        // ================================================================
-        // PASO 3: ACTUALIZAR RESÚMENES EN MONGODB
-        // ================================================================
-        /**
-         * Ahora que todos los datos están cargados, calculamos:
-         * - Total de créditos por estudiante
-         * - Promedio de notas por estudiante
-         * 
-         * Esto se hace con una consulta SQL que agrupa por estudiante.
-        //  */
-        // let totalCredits = await client.query(`
-        //     SELECT 
-        //         ROUND(AVG(e.grade), 1) as average_grade,
-        //         s.email,
-        //         SUM(c.credits) as total_credits 
-        //     FROM student s 
-        //     JOIN enrrollments e ON s.id = e.student_id                      
-        //     JOIN course c ON e.course_code = c.code 
-        //     GROUP BY s.email;
-        // `);
-        
-        // // Actualizamos el resumen de cada estudiante en MongoDB
-        // for (const student of totalCredits.rows) {
-        //     await AcademicTranscripts.updateOne(
-        //         { studentEmail: student.email },
-        //         {
-        //             $set: {
-        //                 "summary.totalCreditsEarned": parseInt(student.total_credits),
-        //                 "summary.averageGrade": parseFloat(student.average_grade)
-        //             }
-        //         }
-        //     );
-        // }
 
         // Confirmamos todos los cambios
         await client.query('COMMIT');
@@ -363,39 +343,10 @@ export async function queryData() {
         return counters;
 
     } catch (error) {
-        console.log('❌ Error en migración:', error);
+        console.log('Error en migración:', error);
         await client.query('ROLLBACK');
         throw error;
     } finally {
         client.release();
     }
 }
-
-/**
- * ============================================================================
- * CONCEPTOS IMPORTANTES DE ESTE ARCHIVO:
- * ============================================================================
- * 
- * 1. ETL (Extract, Transform, Load)
- *    - Extract: Leer datos de una fuente (CSV)
- *    - Transform: Limpiar y normalizar datos
- *    - Load: Cargar en destino (PostgreSQL, MongoDB)
- * 
- * 2. IDEMPOTENCIA
- *    Una operación es idempotente si ejecutarla múltiples veces
- *    produce el mismo resultado que ejecutarla una vez.
- *    ON CONFLICT ... DO UPDATE logra esto.
- * 
- * 3. TRANSACCIONES
- *    BEGIN/COMMIT/ROLLBACK garantizan que todos los cambios
- *    se aplican juntos o ninguno se aplica.
- * 
- * 4. NORMALIZACIÓN
- *    En lugar de repetir "Ingeniería" en cada profesor,
- *    creamos una tabla department y usamos IDs.
- *    Esto ahorra espacio y evita inconsistencias.
- * 
- * 5. FOREIGN KEYS
- *    Garantizan integridad referencial:
- *    No puedes tener un curso con un profesor que no existe.
- */

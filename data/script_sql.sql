@@ -89,3 +89,5 @@ ON UPDATE cascade ON DELETE cascade;
 ALTER TABLE "transaction"
 ADD FOREIGN KEY("order_id") REFERENCES "order"("id")
 ON UPDATE cascade ON DELETE cascade;
+ALTER TABLE "transaction" 
+ADD CONSTRAINT "unique_product_order" UNIQUE ("product_id", "order_id");
