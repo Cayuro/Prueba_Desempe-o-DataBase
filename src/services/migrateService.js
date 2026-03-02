@@ -186,7 +186,7 @@ export async function queryData() {
             const totalLineValue = parseInt(row.total_line_value);
             const transactionDate = new Date(); // Usamos la fecha actual para la transacción
 
-            
+
 
             // primero insertamos city
             const city_result = await client.query(`
@@ -221,75 +221,53 @@ export async function queryData() {
                 RETURNING xmax
             `, [supplierName, supplierEmail]);
 
-            // ------------------------------------------------------------
-            // 2.3: INSERTAR DEPARTAMENTO
-            // ------------------------------------------------------------
-            const department_result = await client.query(`
-                INSERT INTO "department" ("name") 
+          // insertar category 
+
+            const category_result = await client.query(`
+                INSERT INTO "category" ("name") 
                 VALUES ($1) 
                 ON CONFLICT ("name")
                 DO UPDATE SET name = EXCLUDED.name
                 RETURNING xmax
-            `, [department]);
+            `, [categoryName]);
 
-            // Obtenemos el ID del departamento para usarlo en el profesor
-            const departmentId = await client.query(
-                `SELECT id FROM department WHERE name = $1`, 
-                [department]
+            // Obtenemos el ID de la categoría para usarlo en el producto
+            const categoryId = await client.query(
+                `SELECT id FROM category WHERE name = $1`, 
+                [categoryName]
             );
 
-            // ------------------------------------------------------------
-            // 2.4: INSERTAR PROFESOR
-            // ------------------------------------------------------------
-            const professor_result = await client.query(`
-                INSERT INTO "profesor" ("name", "email", "department_id") 
-                VALUES ($1, $2, $3) 
-                ON CONFLICT ("email")
-                DO UPDATE SET name = EXCLUDED.name
-                RETURNING xmax
-            `, [professorName, professorEmail, departmentId.rows[0].id]);
-
-            // Obtenemos el ID del profesor para usarlo en el curso
-            const profesorId = await client.query(
-                `SELECT id FROM profesor WHERE email = $1`, 
-                [professorEmail]
-            );
-
-            // ------------------------------------------------------------
-            // 2.5: INSERTAR CURSO
-            // ------------------------------------------------------------
-            const course_result = await client.query(`
-                INSERT INTO "course" ("code", "name", "credits", "profesor_id") 
+            // insertamos producto con su categoría
+            const product_result = await client.query(`
+                INSERT INTO "product" ("id", "name", "price", "category_id") 
                 VALUES ($1, $2, $3, $4) 
-                ON CONFLICT ("code")
-                DO UPDATE SET name = EXCLUDED.name
+                ON CONFLICT ("id")
+                DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, category_id = EXCLUDED.category_id
                 RETURNING xmax
-            `, [courseCode, courseName, credits, profesorId.rows[0].id]);
+            `, [productSku, productName, unitPrice, categoryId.rows[0].id]);
+            
+            // obtenemos el ID del supplier 
+            const supplierID = await client.query(
+                `select id from supplier where email = $1
+                `, [supplierEmail]
+            )
+            // insertamos relación producto-proveedor
+            const productSupplier_result = await client.query(`
+                INSERT INTO "product_supplier" ("supplier_id","product_id") 
+                VALUES ($1, $2) 
+                ON CONFLICT ("supplier_id", "product_id")
+                DO NOTHING
+                RETURNING xmax
+            `, [supplierID.rows[0].id, productSku]);
 
-            // Obtenemos el ID del estudiante para la inscripción
-            const studentId = await client.query(
-                `SELECT id FROM student WHERE email = $1`, 
-                [studentEmail.toLowerCase()]
-            );
-
-            // ------------------------------------------------------------
-            // 2.6: INSERTAR INSCRIPCIÓN (ENROLLMENT)
-            // ------------------------------------------------------------
-            const enrollment_result = await client.query(`
-                INSERT INTO "enrrollments" (
-                    "enrolmment_id", "semester", "grade", 
-                    "tuition_fee", "student_id", "course_code"
-                ) 
+            // transaction insertamos la transacción con el cliente y producto relacionados
+            const transaction_result = await client.query(`
+                INSERT INTO "transaction" ("id", "quantity", "date", "total_value", "product_id", "customer_id") 
                 VALUES ($1, $2, $3, $4, $5, $6) 
-                ON CONFLICT ("enrolmment_id")
-                DO UPDATE SET 
-                    semester = EXCLUDED.semester,
-                    grade = EXCLUDED.grade,
-                    tuition_fee = EXCLUDED.tuition_fee,
-                    student_id = EXCLUDED.student_id,
-                    course_code = EXCLUDED.course_code
+                ON CONFLICT ("id")
+                DO UPDATE SET quantity = EXCLUDED.quantity, date = EXCLUDED.date, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, customer_id = EXCLUDED.customer_id
                 RETURNING xmax
-            `, [row.enrolmment_id, semester, grade, tuitionFee, studentId.rows[0].id, courseCode]);
+            `, [row.transaction_id, quantity, transactionDate, totalLineValue, productSku, cityId.rows[0].id]);
 
             // ------------------------------------------------------------
             // 2.7: ACTUALIZAR KARDEX EN MONGODB
