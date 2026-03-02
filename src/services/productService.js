@@ -19,8 +19,9 @@ async function getTopProductsByCategory(category) {
             order by total_revenue desc
             limit 10;
         `, [category]);
-        
+        // la query deberia retornar el nombre del producto la cantidad total vendida por cada category y los ingresos generados.
         await client.query('COMMIT');
+        console.log(result.rows);
         
         return result.rows;
         

@@ -4,9 +4,10 @@ import {getCustomerPurchaseHistory} from "../services/clientService.js";
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
-        const clients = await getCustomerPurchaseHistory();
+    
+        const clients = await getCustomerPurchaseHistory(req.params.id);
         
         res.status(200).json({
             message: 'Clientes obtenidos exitosamente',
