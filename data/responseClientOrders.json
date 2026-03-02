@@ -1,0 +1,46 @@
+{
+    "message": "Clientes obtenidos exitosamente",
+    "count": 5,
+    "clients": [
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 150000,
+            "product_name": "Mouse Logitech M502",
+            "quantity": 1
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 750000,
+            "product_name": "Escritorio MDF",
+            "quantity": 1
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 1800000,
+            "product_name": "Impresora HP 110",
+            "quantity": 3
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2003",
+            "date": "2024-02-17T05:00:00.000Z",
+            "total_value": 360000,
+            "product_name": "Teclado Redragon",
+            "quantity": 2
+        },
+        {
+            "name": "Daniel Torres",
+            "order_id": "TXN-2021",
+            "date": "2024-02-01T05:00:00.000Z",
+            "total_value": 2550000,
+            "product_name": "Monitor LG 27 pulgadas",
+            "quantity": 3
+        }
+    ]
+}

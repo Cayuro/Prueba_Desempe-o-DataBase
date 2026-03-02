@@ -1,0 +1,11 @@
+{
+    "message": "Migración completada exitosamente",
+    "counters": {
+        "countCustomers": 9,
+        "countProducts": 15,
+        "countCategories": 3,
+        "countSuppliers": 5,
+        "countOrders": 30,
+        "countTransactions": 78
+    }
+}

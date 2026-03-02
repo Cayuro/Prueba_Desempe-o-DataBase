@@ -3,6 +3,8 @@ import fs from 'fs';
 import csv from 'csv-parser';
 import { env } from "../config/env.js";
 import { customerSchema } from "../models/customerSchema.js";
+import { logSchemaModel } from "../models/logsSchema.js";
+// import { set } from "mongoose";
 
 export async function queryTables() {
     const client = await pool.connect();
@@ -285,8 +287,32 @@ export async function queryData() {
             `, [quantity, totalLineValue, productSku, supplierID.rows[0].id, orderId, customerID.rows[0].id]);
 
            
+// que error tengo con el modelo de logsSchema? no me deja insertar los logs de las transacciones, no se si es por el tipo de dato o por la estructura del modelo, lo que quiero es que cada vez que se inserte o actualice una transacción, se guarde un log en MongoDB con la tabla afectada, la fecha y la query realizada.
 
-            // mongoDB: actualizamos el historial académico del estudiante
+                await logSchemaModel.create({
+                    table: 'transaction',
+                    date: new Date(),
+                    query: `INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
+                    VALUES (${quantity}, ${totalLineValue}, ${productSku}, ${supplierID.rows[0].id}, ${orderId}, ${customerID.rows[0].id}) 
+            ON CONFLICT ("product_id", "order_id")
+            DO UPDATE SET quantity = EXCLUDED.quantity, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, supplier_id = EXCLUDED.supplier_id, customer_id = EXCLUDED.customer_id`
+                }); 
+
+    //         // mongoDB: actualizamos el historial académico del estudiante
+    //         await logSchemaModel.findOneAndUpdate(
+    //             { table: 'transaction' },
+    //             {
+    //                 $push: {
+    //                     table: 'transaction',
+    //                     date: new Date(),
+    //                     query: `INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
+    //                     VALUES (${quantity}, ${totalLineValue}, ${productSku}, ${supplierID.rows[0].id}, ${orderId}, ${customerID.rows[0].id}) 
+    //             ON CONFLICT ("product_id", "order_id")
+    //             DO UPDATE SET quantity = EXCLUDED.quantity, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, supplier_id = EXCLUDED.supplier_id, customer_id = EXCLUDED.customer_id`
+    //     }},
+    //     {upsert: true}
+    // );
+            
             await customerSchema.findOneAndUpdate(
                 { "customerEmail": customerEmail },  // Filtro de búsqueda
                 {

@@ -1,0 +1,27 @@
+[
+    {
+        "product_name": "Audifonos Sony WH",
+        "total_quantity": "9",
+        "total_revenue": "4050000"
+    },
+    {
+        "product_name": "Teclado Redragon",
+        "total_quantity": "16",
+        "total_revenue": "2880000"
+    },
+    {
+        "product_name": "Mouse Logitech M502",
+        "total_quantity": "15",
+        "total_revenue": "2250000"
+    },
+    {
+        "product_name": "Webcam Anker HD",
+        "total_quantity": "8",
+        "total_revenue": "2000000"
+    },
+    {
+        "product_name": "USB Sony 128GB",
+        "total_quantity": "11",
+        "total_revenue": "990000"
+    }
+]

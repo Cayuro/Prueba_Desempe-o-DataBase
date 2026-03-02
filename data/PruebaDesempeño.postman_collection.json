@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "4c4f3ed1-c290-4998-b6bd-d764bf9a4f3f",
+		"name": "PruebaDesempeño",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "52763823",
+		"_collection_link": "https://cayuro-2384676.postman.co/workspace/Juan-Esteban-G%C3%B3mez-Zuluaga's-Wo~69d68f69-4645-4928-8e38-3de296bd719a/collection/52763823-4c4f3ed1-c290-4998-b6bd-d764bf9a4f3f?action=share&source=collection_link&creator=52763823"
+	},
+	"item": [
+		{
+			"name": "migration",
+			"item": [
+				{
+					"name": "api/migracion",
+					"request": {
+						"method": "POST",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "supplierTop",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "topProducts",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "clientOrders",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/client/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"client",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

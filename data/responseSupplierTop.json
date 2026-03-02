@@ -1,0 +1,26 @@
+{
+    "message": "Proveedores obtenidos exitosamente",
+    "count": 5,
+    "suppliers": [
+        {
+            "supplier_name": "Global Supplies Co",
+            "total_quantity": "41"
+        },
+        {
+            "supplier_name": "Distribuciones Andinas",
+            "total_quantity": "35"
+        },
+        {
+            "supplier_name": "AccesNet SAS",
+            "total_quantity": "33"
+        },
+        {
+            "supplier_name": "TechWorld SAS",
+            "total_quantity": "32"
+        },
+        {
+            "supplier_name": "HogarPro Ltda",
+            "total_quantity": "14"
+        }
+    ]
+}
