@@ -287,9 +287,8 @@ export async function queryData() {
             `, [quantity, totalLineValue, productSku, supplierID.rows[0].id, orderId, customerID.rows[0].id]);
 
            
-// que error tengo con el modelo de logsSchema? no me deja insertar los logs de las transacciones, no se si es por el tipo de dato o por la estructura del modelo, lo que quiero es que cada vez que se inserte o actualice una transacción, se guarde un log en MongoDB con la tabla afectada, la fecha y la query realizada.
 
-                await logSchemaModel.create({
+                await logsSchemaModel.create({
                     table: 'transaction',
                     date: new Date(),
                     query: `INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
