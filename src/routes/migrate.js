@@ -1,16 +1,3 @@
-/**
- * ============================================================================
- * ARCHIVO: migrate.js - RUTAS DE MIGRACIÓN DE DATOS
- * ============================================================================
- 
-* ENDPOINT DISPONIBLE:
- * POST /api/prueba/migrate - Ejecuta la migración de datos
- */
-
-// ============================================================================
-// IMPORTACIONES
-// ============================================================================
-
 import { Router } from "express";
 import { migrateData } from "../config/postgres.js";
 
@@ -23,7 +10,6 @@ const router = Router();
 router.post('/migrate', async (req, res) => {
     try {
         // Ejecutamos la migración y obtenemos contadores
-        // counters tendrá: { contStudents: 5, contCourses: 8, contProfessors: 4, ... }
         const counters = await migrateData();
         
         // Enviamos respuesta exitosa (código 200 = OK)
@@ -48,26 +34,6 @@ router.post('/migrate', async (req, res) => {
 
 /**
  * Exportamos el router para usarlo en app.js
- * Allá se monta con: app.use('/api/simulacro', migrateRouter)
+ * Allá se monta con: app.use('/api/prueba', migrateRouter)
  */
 export default router;
-
-/**
- * ============================================================================
- * ¿CÓMO AGREGAR OTRO ENDPOINT A ESTE ROUTER?
- * ============================================================================
- * 
- * Ejemplo: Agregar un endpoint para ver el estado de la última migración
- * 
- * router.get('/status', async (req, res) => {
- *     try {
- *         // Lógica para obtener el estado
- *         const status = await getMigrationStatus();
- *         res.status(200).json({ status });
- *     } catch (error) {
- *         res.status(500).json({ error: error.message });
- *     }
- * });
- * 
- * Esto crearía el endpoint: GET /api/simulacro/status
- */

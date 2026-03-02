@@ -28,7 +28,7 @@ router.get('/:email/details', async (req, res) => {
     try {
         const orders = await getTranscriptByEmail(email);
         
-        // Si no existe el estudiante, retornamos 404
+        // Si no existe el cliente, retornamos 404
         if (!orders) {
             return res.status(404).json({ 
                 message: 'cliente no encontrado',
@@ -36,7 +36,7 @@ router.get('/:email/details', async (req, res) => {
             });
         }
         
-        // Respuesta exitosa con el Kardex completo
+        // ordenes completo
         res.status(200).json({
             message: 'Kardex obtenido exitosamente',
             orders
