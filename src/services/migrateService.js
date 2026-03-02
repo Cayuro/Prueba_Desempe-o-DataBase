@@ -3,7 +3,7 @@ import fs from 'fs';
 import csv from 'csv-parser';
 import { env } from "../config/env.js";
 import { customerSchema, orderHistorySchemaModel } from "../models/customerSchema.js";
-import { logSchemaModel } from "../models/logsSchema.js";
+// import { logsSchemaModel } from "../models/logsSchema.js";
 // import { set } from "mongoose";
 
 export async function queryTables() {
@@ -288,14 +288,14 @@ export async function queryData() {
 
            
 
-                await logsSchemaModel.create({
-                    table: 'transaction',
-                    date: new Date(),
-                    query: `INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
-                    VALUES (${quantity}, ${totalLineValue}, ${productSku}, ${supplierID.rows[0].id}, ${orderId}, ${customerID.rows[0].id}) 
-            ON CONFLICT ("product_id", "order_id")
-            DO UPDATE SET quantity = EXCLUDED.quantity, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, supplier_id = EXCLUDED.supplier_id, customer_id = EXCLUDED.customer_id`
-                }); 
+            //     await logsSchemaModel.create({
+            //         table: 'transaction',
+            //         date: new Date(),
+            //         query: `INSERT INTO "transaction" ("quantity", "total_value", "product_id", "supplier_id", "order_id", "customer_id") 
+            //         VALUES (${quantity}, ${totalLineValue}, ${productSku}, ${supplierID.rows[0].id}, ${orderId}, ${customerID.rows[0].id}) 
+            // ON CONFLICT ("product_id", "order_id")
+            // DO UPDATE SET quantity = EXCLUDED.quantity, total_value = EXCLUDED.total_value, product_id = EXCLUDED.product_id, supplier_id = EXCLUDED.supplier_id, customer_id = EXCLUDED.customer_id`
+            //     }); 
 
     //         // mongoDB: actualizamos el historial académico del estudiante
     //         await logSchemaModel.findOneAndUpdate(
@@ -312,30 +312,30 @@ export async function queryData() {
     //     {upsert: true}
     // );
 
-    await orderHistorySchemaModel.findOneAndUpdate(
-    { "customerEmail": customerEmail },  // Filtro de búsqueda
-    {
-        // Solo aplica si es documento nuevo
-        $setOnInsert: {
-            "orderId": orderId,
-            "date": transactionDate,
-                      },
-        // Siempre agrega el pedido al historial
-        $push: {                
-                "products": [
-                    {
-                        "productSku": productSku,
-                        "productName": productName,
-                        "quantity": quantity,
-                        "unitPrice": unitPrice,
-                        "totalValue": totalLineValue,
-                    }
-                ]
-            }
-        }
-    ,
-    { upsert: true }
-);
+//     await orderHistorySchemaModel.findOneAndUpdate(
+//     {"orderID": orderId },  // Filtro de búsqueda
+//     {
+//         // Solo aplica si es documento nuevo
+//         $setOnInsert: {
+//             "orderId": orderId,
+//             "date": transactionDate,
+//                       },
+//         // Siempre agrega el pedido al historial
+//         $push: {                
+//                 "products": [
+//                     {
+//                         "productSku": productSku,
+//                         "productName": productName,
+//                         "quantity": quantity,
+//                         "unitPrice": unitPrice,
+//                         "totalValue": totalLineValue,
+//                     }
+//                 ]
+//             }
+//         }
+//     ,
+//     { upsert: true }
+// );
             
             await customerSchema.findOneAndUpdate(
                 { "customerEmail": customerEmail },  // Filtro de búsqueda
